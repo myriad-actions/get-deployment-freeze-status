@@ -19,7 +19,7 @@ runs:
     - name: init job  
       uses: myriad-actions/init-job@main
       with:
-        github-pat: ${{ input.github-pat }}
+        github-pat: ${{ inputs.github-pat }}
     - name: Configure AWS credentials 
       uses: aws-actions/configure-aws-credentials@v1
       with:
