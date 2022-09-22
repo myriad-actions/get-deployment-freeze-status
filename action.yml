@@ -1,0 +1,39 @@
+name: 'get deployment freeze'
+
+description: 'A deployment-freeze-status tag is defined on AWS resource,  '
+
+inputs:
+  environment:
+    description: >-
+      one of the testing, preprod or prod envinronment, for the workflow run
+    required: true
+    type: string
+  github-pat:
+    description: >-
+      GitHub personal access token
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: init job  
+      uses: myriad-actions/init-job@main
+      with:
+        github-pat: ${{ inputs.github-pat }}
+    - name: Configure AWS credentials 
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ env.AWS-ROLE-TO-ASSUME }}
+        aws-region: ${{ env.AWS-REGION }}
+    - name: retrieve ecs status
+      if: ${{ env.HOST_MODE == 'ecs' }}
+      run: |
+        touch DFS.env
+        echo is_${{ inputs.environment }}_frozen=$(aws ecs describe-services --include "TAGS" --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER }} --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r ".[]") >> DFS.env
+      shell: bash
+    - name: retrieve ec2 status
+      if: ${{ env.HOST_MODE == 'ec2' }}
+      run: |
+        touch DFS.env
+        echo is_${{ inputs.environment }}_frozen=$(aws ec2 describe-instances --region ${{ env.AWS-REGION } --filters "Name=tag:Environment,Values=${{ inputs.environment }}" "Name=tag:role,Values=${{ env.ROLE }" "Name=instance-state-name,Values=running"  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") >> DFS.env
+      shell: bash
