@@ -35,5 +35,5 @@ runs:
       if: ${{ env.HOST_MODE == 'ec2' }}
       run: |
         touch DFS.env
-        echo is_${{ inputs.environment }}_frozen=$(aws ec2 describe-instances --region ${{ env.AWS-REGION } --filters "Name=tag:Environment,Values=${{ inputs.environment }}" "Name=tag:role,Values=${{ env.ROLE }" "Name=instance-state-name,Values=running"  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") >> DFS.env
+        echo is_${{ inputs.environment }}_frozen=$(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters "Name=tag:Environment,Values=${{ inputs.environment }}" "Name=tag:role,Values=${{ env.ROLE }" "Name=instance-state-name,Values=running"  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") >> DFS.env
       shell: bash
