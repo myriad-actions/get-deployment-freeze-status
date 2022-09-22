@@ -29,7 +29,7 @@ runs:
       if: ${{ env.HOST_MODE == 'ecs' }}
       run: |
         touch DFS.env
-        echo is_${{ inputs.environment }}_frozen=$(aws ecs describe-services --include "TAGS" --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER }} --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r ".[]") >> DFS.env
+        echo is_${{ inputs.environment }}_frozen=$(aws ecs describe-services --include "TAGS" --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER-PREFIX }}${{ inputs.environment }} --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r ".[]") >> DFS.env
       shell: bash
     - name: retrieve ec2 status
       if: ${{ env.HOST_MODE == 'ec2' }}
