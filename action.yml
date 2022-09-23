@@ -22,15 +22,15 @@ runs:
     - name: retrieve preprod status
       id: preprod
       run: |
-        ${{ env.HOST_MODE == 'ecs' }} \ 
-          && echo "true" \
+        ${{ env.HOST_MODE == 'ecs' }}  
+          && echo "true" 
           || echo "false" 
       shell: bash
     - name: retrieve preprod status
       id: prod
       run: |
-        ${{ env.HOST_MODE == 'ec2' }} \ 
-          && echo "true" \
+        ${{ env.HOST_MODE == 'ec2' }}  
+          && echo "true" 
           || echo "false"
       shell: bash
     #- name: retrieve preprod status
