@@ -1,6 +1,6 @@
 name: 'get deployment freeze'
 
-description: 'A deployment-freeze-status tag is defined on AWS resource,  '
+description: 'A deployment-freeze-status tag is defined on AWS resource, this action requires init-job and configure-aws-credentials'
 
 inputs:
   environment:
@@ -25,20 +25,12 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: init job  
-      uses: myriad-actions/init-job@main
-      with:
-        github-pat: ${{ inputs.github-pat }}
-    - name: Configure AWS credentials 
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: ${{ env.AWS-ROLE-TO-ASSUME }}
-        aws-region: ${{ env.AWS-REGION }}
     - name: retrieve preprod status
       if: ${{ env.HOST_MODE == 'ecs' }}
       id: preprod
       run: |
         ${{ env.HOST_MODE == 'ecs' }} && echo "true" || echo "false"
+      shell: bash
     - name: retrieve preprod status
       if: ${{ env.HOST_MODE == 'ecs' }}
       id: prod
