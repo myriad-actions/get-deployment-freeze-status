@@ -46,7 +46,7 @@ runs:
         ${{ env.HOST_MODE == 'ecs' }} && echo "true" || echo "false"
    #    echo "::set-output name=STATUS::$(grep 'app:' mix.exs | sed -e 's/\[//g' -e 's/ //g' -e 's/app://' -e 's/[:,]//g')"
    #    echo is_${{ inputs.environment }}_frozen= >> DFS.env
-   #  shell: bash
+      shell: bash
    #- name: retrieve prod status
    #  if: ${{ env.HOST_MODE == 'ec2' }}
    #  step: prod
