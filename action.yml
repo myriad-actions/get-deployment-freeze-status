@@ -13,8 +13,14 @@ inputs:
       GitHub personal access token
     required: true
 outputs:
-  IS_PREPROD_FROZEN: ${{ steps.preprod.outputs.status }}
-  IS_PROD_FROZEN: ${{ steps.prod.outputs.status }}
+  IS_PREPROD_FROZEN:
+    description: >-
+      whether preprod environement is locked for the deployment
+    value: ${{ steps.preprod.outputs.status }}
+  IS_PROD_FROZEN:
+    description: >-
+      whether preprod environement is locked for the deployment
+    value: ${{ steps.prod.outputs.status }}
       
 runs:
   using: "composite"
