@@ -1,17 +1,11 @@
 name: 'get deployment freeze'
 
-description: 'A deployment-freeze-status tag is defined on AWS resource, this action requires init-job and configure-aws-credentials'
-
-inputs:
-  environment:
-    description: >-
-      one of the testing, preprod or prod envinronment, for the workflow run
-    required: true
-    type: string
-  github-pat:
-    description: >-
-      GitHub personal access token
-    required: true
+description: |
+  'A deployment-freeze-status tag is defined on AWS resource, to indicate whether the deployment is locked.
+    needs:
+    - init-job 
+    - configure-aws-credentials'
+    
 outputs:
   IS_PREPROD_FROZEN:
     description: >-
@@ -26,23 +20,16 @@ runs:
   using: "composite"
   steps:
     - name: retrieve preprod status
-      if: ${{ env.HOST_MODE == 'ecs' }}
       id: preprod
       run: |
-        ${{ env.HOST_MODE == 'ecs' }} && echo "true" || echo "false"
+        ${{ env.HOST_MODE == 'ecs' }} \ 
+          && echo "::set-output name=status:: $(aws ecs describe-services --include 'TAGS' --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER-PREFIX }}preprod --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r '.[]')" \
+          || echo "::set-output name=status:: $(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters "Name=tag:Environment,Values=preprod"  "Name=instance-state-name,Values=running" ${{ env.EXTRA-EC2-FILTERS}}  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") 
       shell: bash
     - name: retrieve preprod status
-      if: ${{ env.HOST_MODE == 'ecs' }}
       id: prod
       run: |
-        ${{ env.HOST_MODE == 'ecs' }} && echo "true" || echo "false"
-   #    echo "::set-output name=STATUS::$(grep 'app:' mix.exs | sed -e 's/\[//g' -e 's/ //g' -e 's/app://' -e 's/[:,]//g')"
-   #    echo is_${{ inputs.environment }}_frozen= >> DFS.env
+        ${{ env.HOST_MODE == 'ecs' }} \ 
+          && echo "::set-output name=status:: $(aws ecs describe-services --include 'TAGS' --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER-PREFIX }}prod --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r '.[]')" \
+          || echo "::set-output name=status:: $(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters "Name=tag:Environment,Values=prod"  "Name=instance-state-name,Values=running" ${{ env.EXTRA-EC2-FILTERS}}  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") 
       shell: bash
-   #- name: retrieve prod status
-   #  if: ${{ env.HOST_MODE == 'ec2' }}
-   #  step: prod
-   #  run: |
-   #    touch DFS.env
-   #    echo is_${{ inputs.environment }}_frozen=$(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters "Name=tag:Environment,Values=${{ inputs.environment }}"  "Name=instance-state-name,Values=running" ${{ env.EXTRA-EC2-FILTERS}}  --query 'Reservations[*].Instances[*].InstanceId' | jq  -r ".[]|.[]") >> DFS.env
-   #  shell: bash
