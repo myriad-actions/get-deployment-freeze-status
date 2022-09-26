@@ -6,6 +6,12 @@ description: |
     - init-job 
     - configure-aws-credentials'
 
+inputs:
+  config-path:
+    description: >-
+      path to the config file in json format
+    required: false
+
 outputs:
   IS_PREPROD_FROZEN:
     description: >-
@@ -19,6 +25,17 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - uses: actions/checkout@main
+    - name: load variables
+      id: load-vars
+      uses: myriad-actions/load-variables@main
+      with:
+        config-path: ${{ inputs.config-path }}
+    - name: configure AWS credentials 
+      uses: aws-actions/configure-aws-credentials@master
+      with:
+        role-to-assume: ${{ fromJson(steps.load-vars.outputs.vars).role-to-assume }}
+        aws-region: ${{ fromJson(steps.load-vars.outputs.vars).aws-region }}
     - name: retrieve preprod status
       id: preprod
       run: |
