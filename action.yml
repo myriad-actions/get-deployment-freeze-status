@@ -7,10 +7,10 @@ description: |
     - configure-aws-credentials'
 
 inputs:
-  config-path:
+  github-pat:
     description: >-
-      path to the config file in json format
-    required: false
+      GitHub personal access token
+    required: true
 
 outputs:
   IS_PREPROD_FROZEN:
@@ -25,17 +25,15 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@main
-    - name: load variables
-      id: load-vars
-      uses: myriad-actions/load-variables@main
+    - name: init job  
+      uses: myriad-actions/init-job@main
       with:
-        config-path: ${{ inputs.config-path }}
-    - name: configure AWS credentials 
-      uses: aws-actions/configure-aws-credentials@master
+        github-pat: ${{ inputs.github-pat }}
+    - name: Configure AWS credentials 
+      uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: ${{ fromJson(steps.load-vars.outputs.vars).role-to-assume }}
-        aws-region: ${{ fromJson(steps.load-vars.outputs.vars).aws-region }}
+        role-to-assume: ${{ env.AWS-ROLE-TO-ASSUME }}
+        aws-region: ${{ env.AWS-REGION }}
     - name: retrieve preprod status
       id: preprod
       run: |
