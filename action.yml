@@ -19,7 +19,7 @@ outputs:
     value: ${{ steps.preprod.outputs.status }}
   IS_PROD_FROZEN:
     description: >-
-      whether preprod environement is locked for the deployment
+      whether prod environement is locked for the deployment
     value: ${{ steps.prod.outputs.status }}
       
 runs:
@@ -42,5 +42,5 @@ runs:
     - name: retrieve prod status
       id: prod
       run: |
-        ${{ env.HOST_MODE == 'ecs' }} && echo "::set-output name=status::$(aws ecs describe-services --include 'TAGS' --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER-PREFIX }}preprod --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r '.[]')" || echo "::set-output name=status:: $(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters 'Name=tag:Environment,Values=preprod'  'Name=instance-state-name,Values=running' ${{ env.EXTRA-EC2-FILTERS}}  --query 'Reservations[*].Instances[*].Tags' | jq -r '.[]| .[]| .[]| select(.Key=="deployment-freeze-status")|.Value' | uniq | xargs )"
+        ${{ env.HOST_MODE == 'ecs' }} && echo "::set-output name=status::$(aws ecs describe-services --include 'TAGS' --services ${{ env.ECS_TASK }} --cluster ${{ env.CLUSTER-PREFIX }}prod --query 'services[].tags[?key==`deployment-freeze-status`].value[]' | jq -r '.[]')" || echo "::set-output name=status:: $(aws ec2 describe-instances --region ${{ env.AWS-REGION }} --filters 'Name=tag:Environment,Values=prod'  'Name=instance-state-name,Values=running' ${{ env.EXTRA-EC2-FILTERS}}  --query 'Reservations[*].Instances[*].Tags' | jq -r '.[]| .[]| .[]| select(.Key=="deployment-freeze-status")|.Value' | uniq | xargs )"
       shell: bash
