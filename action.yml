@@ -30,7 +30,7 @@ runs:
       with:
         github-pat: ${{ inputs.github-pat }}
     - name: Configure AWS credentials 
-      uses: aws-actions/configure-aws-credentials@master
+      uses: aws-actions/configure-aws-credentials@v3
       with:
         role-to-assume: ${{ env.AWS-ROLE-TO-ASSUME }}
         aws-region: ${{ env.AWS-REGION }}
